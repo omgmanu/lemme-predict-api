@@ -1,0 +1,28 @@
+services:
+  # app:
+  #   container_name: game_app
+  #   build:
+  #     context: .
+  #     target: prod
+  #   ports:
+  #     - ${PORT}:${PORT}
+  #   command: node src/index.js
+  #   depends_on:
+  #     - db
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=${PORT}
+  #     - REDIS_HOST=${REDIS_HOST}
+  #     - REDIS_PORT=${REDIS_PORT}
+  #     - REDIS_USERNAME=${REDIS_USERNAME}
+  #     - REDIS_PASSWORD=${REDIS_PASSWORD}
+  db:
+    container_name: game_redis_db
+    image: redis:7.2.4
+    volumes:
+      - redis_data:/data
+    ports:
+      - ${REDIS_PORT}:6379
+
+volumes:
+  redis_data:
