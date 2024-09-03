@@ -5,6 +5,7 @@ import { settleGame } from '../utils/onchain.js';
 import { deleteGameResult, getGame, getGamesByPlayer, getPendingGameResults, updateGameResult } from '../utils/db.js';
 import { getPythPrices } from '../utils/app.js';
 import { PersistedSettledGameResult } from '../types/game.js';
+import { SendTransactionError } from '@solana/web3.js';
 
 const router = new Hono();
 // Enable CORS for all routes
@@ -106,9 +107,8 @@ router.get('/games/settle', async (c) => {
         settleResponse.settled.push(game.gameId);
       } catch (e) {
         console.log(`Error settling game. GameId: ${game.gameId}. Reason: ${e}`);
-        console.log('Deleting game message', (e as Error).message);
-        console.log('Deleting game stack', (e as Error).stack);
-        if ((e as Error).stack?.includes('already in use')) {
+        console.log('Deleting game logs', (e as SendTransactionError).logs);
+        if ((e as SendTransactionError).logs?.find((log) => log.includes('already in use'))) {
           await deleteGameResult(game.gameId);
         }
 
