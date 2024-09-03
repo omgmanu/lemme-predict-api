@@ -105,12 +105,12 @@ router.get('/games/settle', async (c) => {
         await updateGameResult(settledGameResult);
         settleResponse.settled.push(game.gameId);
       } catch (e) {
-        console.log('Error settling game', game.gameId, e);
+        console.log(`Error settling game. GameId: ${game.gameId}. Reason: ${e}`);
 
-        return c.json({
-          success: false,
-          message: `Error settling game. Reason: ${e}`,
-        });
+        // return c.json({
+        //   success: false,
+        //   message: `Error settling game. GameId: ${game.gameId}. Reason: ${e}`,
+        // });
       }
     } else {
       console.log('No prices found for game', game.gameId);
