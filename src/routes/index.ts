@@ -1,18 +1,19 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors'
-import * as anchor from '@coral-xyz/anchor';
+import { cors } from 'hono/cors';
+import BN from 'bn.js';
 import { settleGame } from '../utils/onchain.js';
 import { getGame, getGamesByPlayer, getPendingGameResults, updateGameResult } from '../utils/db.js';
 import { getPythPrices } from '../utils/app.js';
 import { PersistedSettledGameResult } from '../types/game.js';
 
 const router = new Hono();
-
 // Enable CORS for all routes
-router.use('/*', cors({
-  origin: '*', // Allow any origin
-}));
-
+router.use(
+  '/*',
+  cors({
+    origin: '*', // Allow any origin
+  }),
+);
 
 const validatorCb = (result: any, c: any) => {
   if (!result.success) {
@@ -86,7 +87,7 @@ router.get('/games/settle', async (c) => {
     const [priceAtStart, priceAtEnd] = await getPythPrices(game);
 
     if (priceAtStart && priceAtEnd) {
-      const result = new anchor.BN(priceAtStart.price).lt(new anchor.BN(priceAtEnd.price)) === game.prediction;
+      const result = new BN(priceAtStart.price).lt(new BN(priceAtEnd.price)) === game.prediction;
       const amountWon = game.betAmount * (result ? 2 : 0);
       // settle game
       const transactionId = await settleGame(game, result, amountWon);
