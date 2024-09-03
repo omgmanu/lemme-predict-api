@@ -87,22 +87,31 @@ router.get('/games/settle', async (c) => {
     const [priceAtStart, priceAtEnd] = await getPythPrices(game);
 
     if (priceAtStart && priceAtEnd) {
-      const result = new BN(priceAtStart.price).lt(new BN(priceAtEnd.price)) === game.prediction;
-      const amountWon = game.betAmount * (result ? 2 : 0);
-      // settle game
-      const transactionId = await settleGame(game, result, amountWon);
-      console.log('transactionSignature', transactionId);
+      try {
+        const result = new BN(priceAtStart.price).lt(new BN(priceAtEnd.price)) === game.prediction;
+        const amountWon = game.betAmount * (result ? 2 : 0);
+        // settle game
+        const transactionId = await settleGame(game, result, amountWon);
+        console.log('transactionSignature', transactionId);
 
-      const settledGameResult: PersistedSettledGameResult = {
-        ...game,
-        priceAtStart: priceAtStart.price,
-        priceAtEnd: priceAtEnd.price,
-        result,
-        amountWon,
-        transactionId: transactionId,
-      };
-      await updateGameResult(settledGameResult);
-      settleResponse.settled.push(game.gameId);
+        const settledGameResult: PersistedSettledGameResult = {
+          ...game,
+          priceAtStart: priceAtStart.price,
+          priceAtEnd: priceAtEnd.price,
+          result,
+          amountWon,
+          transactionId: transactionId,
+        };
+        await updateGameResult(settledGameResult);
+        settleResponse.settled.push(game.gameId);
+      } catch (e) {
+        console.log('Error settling game', game.gameId, e);
+
+        return c.json({
+          success: false,
+          message: `Error settling game. Reason: ${e}`,
+        });
+      }
     } else {
       console.log('No prices found for game', game.gameId);
     }
