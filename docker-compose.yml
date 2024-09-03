@@ -23,6 +23,8 @@ services:
   db:
     container_name: game_redis_db
     image: redis:7.2.4
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
     volumes:
       - redis_data:/data
     ports:

@@ -113,15 +113,9 @@ router.get('/games/settle', async (c) => {
         settleResponse.settled.push(game.gameId);
       } catch (e) {
         console.log(`Error settling game. GameId: ${game.gameId}. Reason: ${e}`);
-        console.log('Deleting game logs', (e as SendTransactionError).logs);
         if ((e as SendTransactionError).logs?.find((log) => log.includes('already in use')) !== undefined) {
           await deletePendingGameResult(game.gameId);
         }
-
-        // return c.json({
-        //   success: false,
-        //   message: `Error settling game. GameId: ${game.gameId}. Reason: ${e}`,
-        // });
       }
     } else {
       console.log('No prices found for game', game.gameId);
