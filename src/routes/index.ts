@@ -2,7 +2,13 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import BN from 'bn.js';
 import { settleGame } from '../utils/onchain.js';
-import { deleteGameResult, getGame, getGamesByPlayer, getPendingGameResults, updateGameResult } from '../utils/db.js';
+import {
+  deletePendingGameResult,
+  getGame,
+  getGamesByPlayer,
+  getPendingGameResults,
+  updateGameResult,
+} from '../utils/db.js';
 import { getPythPrices } from '../utils/app.js';
 import { PersistedSettledGameResult } from '../types/game.js';
 import { SendTransactionError } from '@solana/web3.js';
@@ -108,8 +114,8 @@ router.get('/games/settle', async (c) => {
       } catch (e) {
         console.log(`Error settling game. GameId: ${game.gameId}. Reason: ${e}`);
         console.log('Deleting game logs', (e as SendTransactionError).logs);
-        if ((e as SendTransactionError).logs?.find((log) => log.includes('already in use'))) {
-          await deleteGameResult(game.gameId);
+        if ((e as SendTransactionError).logs?.find((log) => log.includes('already in use')) !== undefined) {
+          await deletePendingGameResult(game.gameId);
         }
 
         // return c.json({

@@ -113,7 +113,7 @@ export const updateGameResult = async (game: PersistedSettledGameResult) => {
   ]);
 };
 
-export const deleteGameResult = async (gameId: string): Promise<number> => {
+export const deletePendingGameResult = async (gameId: string): Promise<number> => {
   const redisClient = AppService.getInstance().redisClient;
-  return redisClient.del(`${GAME_RESULT_KEY_PREFIX}:*:${gameId}:*`);
+  return redisClient.del(`${GAME_RESULT_KEY_PREFIX}:*:${gameId}:${GameResultStatus.PENDING}`);
 };
