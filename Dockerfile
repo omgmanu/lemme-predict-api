@@ -1,5 +1,7 @@
 FROM node:20-alpine AS base
 
+RUN apk add --no-cache curl
+
 FROM base AS builder
 
 RUN apk add --no-cache gcompat
