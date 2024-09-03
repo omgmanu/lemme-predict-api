@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import BN from 'bn.js';
 import { settleGame } from '../utils/onchain.js';
-import { getGame, getGamesByPlayer, getPendingGameResults, updateGameResult } from '../utils/db.js';
+import { deleteGameResult, getGame, getGamesByPlayer, getPendingGameResults, updateGameResult } from '../utils/db.js';
 import { getPythPrices } from '../utils/app.js';
 import { PersistedSettledGameResult } from '../types/game.js';
 
@@ -106,6 +106,10 @@ router.get('/games/settle', async (c) => {
         settleResponse.settled.push(game.gameId);
       } catch (e) {
         console.log(`Error settling game. GameId: ${game.gameId}. Reason: ${e}`);
+        if ((e as Error).message.includes('already in use')) {
+          console.log('Deleting game result', (e as Error).message);
+          await deleteGameResult(game.gameId);
+        }
 
         // return c.json({
         //   success: false,
