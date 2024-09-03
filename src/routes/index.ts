@@ -106,8 +106,9 @@ router.get('/games/settle', async (c) => {
         settleResponse.settled.push(game.gameId);
       } catch (e) {
         console.log(`Error settling game. GameId: ${game.gameId}. Reason: ${e}`);
-        if ((e as Error).message.includes('already in use')) {
-          console.log('Deleting game result', (e as Error).message);
+        console.log('Deleting game message', (e as Error).message);
+        console.log('Deleting game stack', (e as Error).stack);
+        if ((e as Error).stack?.includes('already in use')) {
           await deleteGameResult(game.gameId);
         }
 
