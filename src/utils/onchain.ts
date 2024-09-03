@@ -1,15 +1,12 @@
 import { Keypair, Connection, PublicKey } from '@solana/web3.js';
 import * as anchor from '@coral-xyz/anchor';
-import { Program } from '@coral-xyz/anchor';
-import { BN } from '@coral-xyz/anchor';
-import idl from '../idl/game.json';
-import AppService from '../services/app.service';
-import { PersistedPendingGameResult } from '../types/game';
-import env from '../env';
+import AppService from '../services/app.service.js';
+import { PersistedPendingGameResult } from '../types/game.js';
+import env from '../env.js';
 
 const gameVaultKeypair = Keypair.fromSecretKey(new Uint8Array(JSON.parse(env['VAULT_PRIVATE_KEY'])));
 
-export const buildGamePDA = (playerPublicKey: PublicKey, gameId: BN): PublicKey => {
+export const buildGamePDA = (playerPublicKey: PublicKey, gameId: anchor.BN): PublicKey => {
   const programId = AppService.getInstance().program.programId;
 
   const gamePDA = PublicKey.findProgramAddressSync(
@@ -20,7 +17,7 @@ export const buildGamePDA = (playerPublicKey: PublicKey, gameId: BN): PublicKey 
   return gamePDA;
 };
 
-export const buildGameResultPDA = (gameId: BN): PublicKey => {
+export const buildGameResultPDA = (gameId: anchor.BN): PublicKey => {
   const programId = AppService.getInstance().programWithProvider.programId;
 
   const gameResultPDA = PublicKey.findProgramAddressSync(
@@ -36,11 +33,11 @@ export const settleGame = async (
   result: boolean,
   amountWon: number,
 ): Promise<string> => {
-  const gameId = new BN(game.gameId);
+  const gameId = new anchor.BN(game.gameId);
   const gameResultPDA = buildGameResultPDA(gameId);
 
   const transaction = await AppService.getInstance()
-    .programWithProvider.methods.settleGame(gameId, result, new BN(amountWon))
+    .programWithProvider.methods.settleGame(gameId, result, new anchor.BN(amountWon))
     .accounts({
       player: game.player,
       // @ts-ignore

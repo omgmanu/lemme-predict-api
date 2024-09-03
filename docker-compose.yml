@@ -1,21 +1,25 @@
 services:
-  # app:
-  #   container_name: game_app
-  #   build:
-  #     context: .
-  #     target: prod
-  #   ports:
-  #     - ${PORT}:${PORT}
-  #   command: node src/index.js
-  #   depends_on:
-  #     - db
-  #   environment:
-  #     - NODE_ENV=production
-  #     - PORT=${PORT}
-  #     - REDIS_HOST=${REDIS_HOST}
-  #     - REDIS_PORT=${REDIS_PORT}
-  #     - REDIS_USERNAME=${REDIS_USERNAME}
-  #     - REDIS_PASSWORD=${REDIS_PASSWORD}
+  app:
+    container_name: game_app
+    build:
+      context: .
+    ports:
+      - ${PORT}:${PORT}
+    command: npm start
+    # ... other configurations ...
+    depends_on:
+      - db
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT}
+      - REDIS_HOST=db
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_USERNAME=${REDIS_USERNAME}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SOLANA_RPC_HTTPS=${SOLANA_RPC_HTTPS}
+      - SOLANA_RPC_WSS=${SOLANA_RPC_WSS}
+      - VAULT_PRIVATE_KEY=${VAULT_PRIVATE_KEY}
+      - PYTH_PROGRAM_ID=${PYTH_PROGRAM_ID}
   db:
     container_name: game_redis_db
     image: redis:7.2.4

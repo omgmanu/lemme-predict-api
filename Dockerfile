@@ -5,7 +5,8 @@ FROM base AS builder
 RUN apk add --no-cache gcompat
 WORKDIR /app
 
-COPY package*json tsconfig.json src ./
+COPY package*.json tsconfig.json ./
+COPY src ./src
 
 RUN npm ci && \
     npm run build && \
@@ -24,4 +25,4 @@ COPY --from=builder --chown=hono:nodejs /app/package.json /app/package.json
 USER hono
 EXPOSE 3000
 
-CMD ["node", "/app/dist/index.js"]
+# CMD ["node", "/app/dist/index.js"]

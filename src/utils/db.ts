@@ -4,8 +4,8 @@ import {
   PersistedGame,
   PersistedPendingGameResult,
   PersistedSettledGameResult,
-} from '../types/game';
-import AppService from '../services/app.service';
+} from '../types/game.js';
+import AppService from '../services/app.service.js';
 
 const GAME_KEY_PREFIX = 'game';
 const GAME_RESULT_KEY_PREFIX = 'game-result';

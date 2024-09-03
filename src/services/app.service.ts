@@ -1,11 +1,11 @@
 import { Connection, Keypair } from '@solana/web3.js';
 import * as anchor from '@coral-xyz/anchor';
 import { Redis } from 'ioredis';
-import LoggerService from './logger.service';
-import env from '../env';
-import idl from '../idl/game.json';
+import LoggerService from './logger.service.js';
+import env from '../env.js';
+import idl from '../idl/game.json' assert { type: 'json' };;
 import type { Game } from '../idl/game';
-import { persistGame } from '../utils/db';
+import { persistGame } from '../utils/db.js';
 
 const gameVaultKeypair = Keypair.fromSecretKey(new Uint8Array(JSON.parse(env['VAULT_PRIVATE_KEY'])));
 

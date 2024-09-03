@@ -1,6 +1,6 @@
 import { PersistedPendingGameResult } from '../types/game';
-import { PythPrice } from '../types/pyth';
-import env from '../env';
+import { PythPrice } from '../types/pyth.js';
+import env from '../env.js';
 
 const BTC_USD_ID = env['PYTH_PROGRAM_ID'];
 

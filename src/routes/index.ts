@@ -1,14 +1,10 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors'
-import { zValidator } from '@hono/zod-validator';
-import { newGameSchema } from './schemas';
-import AppService from '../services/app.service';
-import { PublicKey } from '@solana/web3.js';
-import { BN } from '@coral-xyz/anchor';
-import { buildGamePDA, settleGame } from '../utils/onchain';
-import { getGame, getGamesByPlayer, getPendingGameResults, updateGameResult } from '../utils/db';
-import { getPythPrices } from '../utils/app';
-import { PersistedSettledGameResult } from '../types/game';
+import * as anchor from '@coral-xyz/anchor';
+import { settleGame } from '../utils/onchain.js';
+import { getGame, getGamesByPlayer, getPendingGameResults, updateGameResult } from '../utils/db.js';
+import { getPythPrices } from '../utils/app.js';
+import { PersistedSettledGameResult } from '../types/game.js';
 
 const router = new Hono();
 
@@ -90,7 +86,7 @@ router.get('/games/settle', async (c) => {
     const [priceAtStart, priceAtEnd] = await getPythPrices(game);
 
     if (priceAtStart && priceAtEnd) {
-      const result = new BN(priceAtStart.price).lt(new BN(priceAtEnd.price)) === game.prediction;
+      const result = new anchor.BN(priceAtStart.price).lt(new anchor.BN(priceAtEnd.price)) === game.prediction;
       const amountWon = game.betAmount * (result ? 2 : 0);
       // settle game
       const transactionId = await settleGame(game, result, amountWon);
