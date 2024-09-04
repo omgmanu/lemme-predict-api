@@ -3,9 +3,10 @@ import * as anchor from '@coral-xyz/anchor';
 import { Redis } from 'ioredis';
 import LoggerService from './logger.service.js';
 import env from '../env.js';
-import idl from '../idl/game.json' assert { type: 'json' };;
+import idl from '../idl/game.json' assert { type: 'json' };
 import type { Game } from '../idl/game';
 import { persistGame } from '../utils/db.js';
+import { Game as GameType } from '../types/game.js';
 
 const gameVaultKeypair = Keypair.fromSecretKey(new Uint8Array(JSON.parse(env['VAULT_PRIVATE_KEY'])));
 
@@ -73,7 +74,7 @@ class AppService {
     this._rpcConnection.onProgramAccountChange(
       this._program.programId,
       async (updatedAccountInfo, context) => {
-        let decodedGameData = null;
+        let decodedGameData: GameType | null = null;
         try {
           decodedGameData = this._program.coder.accounts.decode('game', updatedAccountInfo.accountInfo.data);
         } catch (e) {
@@ -81,6 +82,11 @@ class AppService {
         }
 
         if (decodedGameData) {
+          const isGameRecent = decodedGameData.startTime.toNumber() > Date.now() / 1000 - 60 * 60; // 1 hour
+          if (!isGameRecent) {
+            return;
+          }
+
           // Get the transaction signature
           const signature = context.slot
             ? await this._rpcConnection.getSignaturesForAddress(
