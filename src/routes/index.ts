@@ -12,7 +12,7 @@ import {
 import { getPythPrices } from '../utils/app.js';
 import { PersistedSettledGameResult } from '../types/game.js';
 import { SendTransactionError } from '@solana/web3.js';
-import env from '../env';
+import env from '../env.js';
 
 const router = new Hono();
 // Enable CORS for all routes
