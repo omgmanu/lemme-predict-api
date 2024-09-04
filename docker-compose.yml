@@ -6,13 +6,10 @@ services:
     ports:
       - ${PORT}:${PORT}
     command: npm start
-    # ... other configurations ...
-    depends_on:
-      - db
     environment:
       - NODE_ENV=production
       - PORT=${PORT}
-      - REDIS_HOST=db
+      - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
       - REDIS_USERNAME=${REDIS_USERNAME}
       - REDIS_PASSWORD=${REDIS_PASSWORD}
@@ -20,15 +17,3 @@ services:
       - SOLANA_RPC_WSS=${SOLANA_RPC_WSS}
       - VAULT_PRIVATE_KEY=${VAULT_PRIVATE_KEY}
       - PYTH_PROGRAM_ID=${PYTH_PROGRAM_ID}
-  db:
-    container_name: game_redis_db
-    image: redis:7.2.4
-    restart: always
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - redis_data:/data
-    ports:
-      - ${REDIS_PORT}:6379
-
-volumes:
-  redis_data:
