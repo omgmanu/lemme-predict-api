@@ -29,12 +29,7 @@ class AppService {
     });
     const programWithProvider = new anchor.Program<Game>(idl as Game, provider);
 
-    const redisClient = new Redis({
-      port: env.REDIS_PORT,
-      host: env.REDIS_HOST,
-      username: env.REDIS_USERNAME,
-      password: env.REDIS_PASSWORD,
-    });
+    const redisClient = new Redis(env.REDIS_CONNECTION_STRING);
 
     this._redisClient = redisClient;
     this._rpcConnection = connection;
