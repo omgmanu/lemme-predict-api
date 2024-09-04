@@ -12,6 +12,7 @@ import {
 import { getPythPrices } from '../utils/app.js';
 import { PersistedSettledGameResult } from '../types/game.js';
 import { SendTransactionError } from '@solana/web3.js';
+import env from '../env';
 
 const router = new Hono();
 // Enable CORS for all routes
@@ -75,6 +76,15 @@ router.get('/game/:gameId', async (c) => {
 });
 
 router.get('/games/settle', async (c) => {
+  const authKey = c.req.query('authKey');
+  
+  if (authKey !== env.SETTLE_AUTH_KEY) {
+    return c.json({
+      success: false,
+      message: 'Unauthorized: Invalid auth key',
+    }, 401);
+  }
+
   // get games that needs to be settled
   const pendingGameResults = await getPendingGameResults();
   const pastPendingGameResults = pendingGameResults.filter(

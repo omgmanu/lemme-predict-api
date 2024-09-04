@@ -8,6 +8,7 @@ const EnvSchema = z.object({
   SOLANA_RPC_WSS: z.string(),
   VAULT_PRIVATE_KEY: z.string(),
   PYTH_PROGRAM_ID: z.string(),
+  SETTLE_AUTH_KEY: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;
