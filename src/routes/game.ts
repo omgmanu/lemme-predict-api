@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 import BN from 'bn.js';
+import { SendTransactionError } from '@solana/web3.js';
 import { settleGame } from '../utils/onchain.js';
 import {
   deletePendingGameResult,
@@ -11,51 +11,9 @@ import {
 } from '../utils/db.js';
 import { getPythPrices } from '../utils/app.js';
 import { PersistedSettledGameResult } from '../types/game.js';
-import { SendTransactionError } from '@solana/web3.js';
 import env from '../env.js';
 
 const router = new Hono();
-// Enable CORS for all routes
-router.use(
-  '/*',
-  cors({
-    origin: '*', // Allow any origin
-  }),
-);
-
-const validatorCb = (result: any, c: any) => {
-  if (!result.success) {
-    return c.text('Invalid!', 400);
-  }
-};
-
-// router.post('/game', zValidator('json', newGameSchema, validatorCb), async (c) => {
-//   const data = c.req.valid('json');
-
-//   // build PDA and fetch data from solana RPC
-//   const player = new PublicKey(data.player);
-//   const gameId = new BN(data.gameId);
-
-//   const gamePDA = buildGamePDA(player, gameId);
-//   const gameAccount = await AppService.getInstance().program.account.game.fetch(gamePDA);
-
-//   console.log(gameAccount);
-
-//   await AppService.getInstance().redisClient.set(
-//     `game:${data.player}:${data.gameId}`,
-//     JSON.stringify({
-//       startTime: gameAccount.startTime.toNumber(),
-//       endTime: gameAccount.endTime.toNumber(),
-//       betAmount: gameAccount.betAmount.toNumber(),
-//       prediction: gameAccount.prediction,
-//     }),
-//   );
-
-//   return c.json({
-//     success: true,
-//     message: 'OK',
-//   });
-// });
 
 router.get('/game/:gameId', async (c) => {
   const gameId = c.req.param('gameId');
@@ -77,12 +35,15 @@ router.get('/game/:gameId', async (c) => {
 
 router.get('/games/settle', async (c) => {
   const authKey = c.req.query('authKey');
-  
+
   if (authKey !== env.SETTLE_AUTH_KEY) {
-    return c.json({
-      success: false,
-      message: 'Unauthorized: Invalid auth key',
-    }, 401);
+    return c.json(
+      {
+        success: false,
+        message: 'Unauthorized: Invalid auth key',
+      },
+      401,
+    );
   }
 
   // get games that needs to be settled

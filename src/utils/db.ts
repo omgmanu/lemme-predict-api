@@ -6,6 +6,7 @@ import {
   PersistedSettledGameResult,
 } from '../types/game.js';
 import AppService from '../services/app.service.js';
+import { XUser } from '@hono/oauth-providers/x';
 
 const GAME_KEY_PREFIX = 'game';
 const GAME_RESULT_KEY_PREFIX = 'game-result';
@@ -116,4 +117,22 @@ export const updateGameResult = async (game: PersistedSettledGameResult) => {
 export const deletePendingGameResult = async (gameId: string): Promise<number> => {
   const redisClient = AppService.getInstance().redisClient;
   return redisClient.del(`${GAME_RESULT_KEY_PREFIX}:*:${gameId}:${GameResultStatus.PENDING}`);
+};
+
+export const persistUser = async (userId: string, user: Partial<XUser>) => {
+  const redisClient = AppService.getInstance().redisClient;
+
+  return redisClient.set(`user:${userId}`, JSON.stringify(user));
+};
+
+export const getUser = async (userId: string): Promise<XUser | null> => {
+  const redisClient = AppService.getInstance().redisClient;
+
+  const user = await redisClient.get(`user:${userId}`);
+  return user ? JSON.parse(user) : null;
+};
+
+export const deleteUser = async (userId: string): Promise<number> => {
+  const redisClient = AppService.getInstance().redisClient;
+  return redisClient.del(`user:${userId}`);
 };

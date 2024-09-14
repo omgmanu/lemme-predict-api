@@ -9,6 +9,13 @@ const EnvSchema = z.object({
   VAULT_PRIVATE_KEY: z.string(),
   PYTH_PROGRAM_ID: z.string(),
   SETTLE_AUTH_KEY: z.string(),
+  TWITTER_CLIENT_ID: z.string(),
+  TWITTER_CLIENT_SECRET: z.string(),
+  TWITTER_CALLBACK_URL_BASE: z.string(),
+  SESSION_ENCRYPTION_KEY: z.string(),
+  SESSION_EXPIRE_AFTER_SECONDS: z.string().transform((v) => parseInt(v)),
+  TWITTER_REDIRECT_AFTER_LOGIN: z.string(),
+  FRONTEND_URL: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;
