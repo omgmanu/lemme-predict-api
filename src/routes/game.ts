@@ -1,17 +1,10 @@
 import { Hono } from 'hono';
-import BN from 'bn.js';
-import { SendTransactionError } from '@solana/web3.js';
-import { settleGame } from '../utils/onchain.js';
-import {
-  deletePendingGameResult,
-  getGame,
-  getGamesByPlayer,
-  getPendingGameResults,
-  updateGameResult,
-} from '../utils/db.js';
-import { getPythPrices } from '../utils/app.js';
-import { PersistedSettledGameResult } from '../types/game.js';
+import { getGame, getGamesByPlayer, getPendingGameResults } from '../utils/db.js';
 import env from '../env.js';
+import { createGame, settlePendingGames } from 'src/services/game.service.js';
+import { getFromSession } from 'src/services/auth.service.js';
+import { validator } from 'hono/validator';
+import { newGameSchema } from './schemas.js';
 
 const router = new Hono();
 
@@ -52,54 +45,11 @@ router.get('/games/settle', async (c) => {
     (game) => game.endTime < Math.floor(new Date().getTime() / 1000),
   );
 
-  const settleResponse: {
-    pending: string[];
-    settled: string[];
-  } = {
-    pending: [],
-    settled: [],
-  };
-
-  // decide game results
-  for (const game of pastPendingGameResults) {
-    const [priceAtStart, priceAtEnd] = await getPythPrices(game);
-
-    if (priceAtStart && priceAtEnd) {
-      try {
-        const result = new BN(priceAtStart.price).lt(new BN(priceAtEnd.price)) === game.prediction;
-        const amountWon = game.betAmount * (result ? 2 : 0);
-        // settle game
-        const transactionId = await settleGame(game, result, amountWon);
-        console.log('transactionSignature', transactionId);
-
-        const settledGameResult: PersistedSettledGameResult = {
-          ...game,
-          priceAtStart: priceAtStart.price,
-          priceAtEnd: priceAtEnd.price,
-          result,
-          amountWon,
-          transactionId: transactionId,
-        };
-        await updateGameResult(settledGameResult);
-        settleResponse.settled.push(game.gameId);
-      } catch (e) {
-        console.log(`Error settling game. GameId: ${game.gameId}. Reason: ${e}`);
-        if ((e as SendTransactionError).logs?.find((log) => log.includes('already in use')) !== undefined) {
-          await deletePendingGameResult(game.gameId);
-        }
-      }
-    } else {
-      console.log('No prices found for game', game.gameId);
-    }
-  }
-
-  settleResponse.pending = pendingGameResults
-    .filter((item) => !settleResponse.settled.includes(item.gameId))
-    .map((item) => item.gameId);
+  const result = await settlePendingGames(pastPendingGameResults);
 
   return c.json({
     success: true,
-    message: settleResponse,
+    message: result,
   });
 });
 
@@ -112,5 +62,41 @@ router.get('/games/:playerAddress', async (c) => {
     message: games.sort((a, b) => b.startTime - a.startTime),
   });
 });
+
+router.post(
+  '/games/create',
+  validator('json', (value, c) => {
+    const parsed = newGameSchema.safeParse(value);
+
+    return !parsed.success
+      ? c.json(
+          {
+            error: 'Invalid request',
+          },
+          400,
+        )
+      : parsed.data;
+  }),
+  async (c) => {
+    const userId = getFromSession(c, 'user-id');
+    const { timeframe, betAmount, prediction } = c.req.valid('json');
+
+    if (!userId) {
+      return c.json(
+        {
+          error: 'User not logged in',
+        },
+        401,
+      );
+    }
+
+    const game = await createGame(userId, timeframe, betAmount, prediction);
+
+    return c.json({
+      success: true,
+      message: game,
+    });
+  },
+);
 
 export default router;

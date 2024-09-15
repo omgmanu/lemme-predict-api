@@ -6,7 +6,7 @@ import {
   PersistedSettledGameResult,
 } from '../types/game.js';
 import AppService from '../services/app.service.js';
-import { XUser } from '@hono/oauth-providers/x';
+import { User } from '../types/user.js';
 
 const GAME_KEY_PREFIX = 'game';
 const GAME_RESULT_KEY_PREFIX = 'game-result';
@@ -48,7 +48,6 @@ export const getGame = async (
   gameId: string,
 ): Promise<{ game: PersistedGame; gameResult: PersistedPendingGameResult } | null> => {
   const redisClient = AppService.getInstance().redisClient;
-  // const keys = await redisClient.keys(`${GAME_KEY_PREFIX}:*:${gameId}`);
   const [gameKeys, gameResultKeys] = await Promise.all([
     redisClient.keys(`${GAME_KEY_PREFIX}:*:${gameId}`),
     redisClient.keys(`${GAME_RESULT_KEY_PREFIX}:*:${gameId}:*`),
@@ -119,20 +118,36 @@ export const deletePendingGameResult = async (gameId: string): Promise<number> =
   return redisClient.del(`${GAME_RESULT_KEY_PREFIX}:*:${gameId}:${GameResultStatus.PENDING}`);
 };
 
-export const persistUser = async (userId: string, user: Partial<XUser>) => {
+export const persistUser = async (user: User, walletId: number) => {
   const redisClient = AppService.getInstance().redisClient;
 
-  return redisClient.set(`user:${userId}`, JSON.stringify(user));
+  return redisClient.set(`user:${user.id}:${walletId}`, JSON.stringify(user));
 };
 
-export const getUser = async (userId: string): Promise<XUser | null> => {
+export const getUser = async (userId: string): Promise<User | null> => {
   const redisClient = AppService.getInstance().redisClient;
 
-  const user = await redisClient.get(`user:${userId}`);
-  return user ? JSON.parse(user) : null;
+  const userKeys = await redisClient.keys(`user:${userId}:*`);
+
+  if (!userKeys.length) {
+    return null;
+  }
+
+  const valuesNotNull = (await redisClient.mget(userKeys)).filter((item) => item !== null) as string[];
+  const users = valuesNotNull.map((item) => JSON.parse(item));
+
+  return users.length ? users[0] : null;
 };
 
 export const deleteUser = async (userId: string): Promise<number> => {
   const redisClient = AppService.getInstance().redisClient;
   return redisClient.del(`user:${userId}`);
+};
+
+export const getUsersCount = async (): Promise<number> => {
+  const redisClient = AppService.getInstance().redisClient;
+
+  const keys = await redisClient.keys('user:*:*');
+
+  return keys.length;
 };

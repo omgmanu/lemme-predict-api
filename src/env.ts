@@ -16,6 +16,7 @@ const EnvSchema = z.object({
   SESSION_EXPIRE_AFTER_SECONDS: z.string().transform((v) => parseInt(v)),
   TWITTER_REDIRECT_AFTER_LOGIN: z.string(),
   FRONTEND_URL: z.string(),
+  MASTER_MNEMONIC: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;

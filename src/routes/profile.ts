@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
-import { getFromSession, setToSession } from 'src/services/auth.service.js';
-import { getUser } from 'src/utils/db.js';
+import { getFromSession, setToSession } from '../services/auth.service.js';
+import { getUser } from '../utils/db.js';
+import { getPrivateKey } from 'src/services/wallet.service.js';
 
 const router = new Hono();
 
@@ -20,12 +21,30 @@ router.use('/profile/*', async (c, next) => {
 
 router.get('/profile/me', async (c) => {
   const userId = getFromSession(c, 'user-id');
-
-  // get user from DB
   const user = await getUser(userId);
 
   return c.json({
     user,
+  });
+});
+
+router.get('/profile/private-key', async (c) => {
+  const userId = getFromSession(c, 'user-id');
+  const user = await getUser(userId);
+
+  if (!user) {
+    return c.json(
+      {
+        error: 'User not found',
+      },
+      404,
+    );
+  }
+
+  const privateKey = getPrivateKey(user.walletId);
+
+  return c.json({
+    privateKey,
   });
 });
 

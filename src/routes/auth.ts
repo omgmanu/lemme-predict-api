@@ -1,8 +1,7 @@
 import { Hono } from 'hono';
 import env from '../env.js';
-import { xAuth } from '@hono/oauth-providers/x';
-import { setToSession } from 'src/services/auth.service.js';
-import { persistUser } from 'src/utils/db.js';
+import { xAuth, XUser } from '@hono/oauth-providers/x';
+import { onAfterLogin } from '../services/auth.service.js';
 
 const router = new Hono();
 
@@ -17,15 +16,14 @@ router.use(
   }),
 );
 
-router.get('/auth/x', (c) => {
+router.get('/auth/x', async (c) => {
   const token = c.get('token');
   const refreshToken = c.get('refresh-token');
   const grantedScopes = c.get('granted-scopes');
   const user = c.get('user-x');
 
   if (user && user.id) {
-    persistUser(user.id, user);
-    setToSession(c, 'user-id', user.id);
+    await onAfterLogin(c, user as XUser);
   } else {
     return c.json(
       {
