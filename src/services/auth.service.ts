@@ -1,7 +1,7 @@
 import { XUser } from '@hono/oauth-providers/x';
 import { Context } from 'hono';
-import { getUser, getUsersCount, persistUser } from '../utils/db';
-import { generateWallet } from './wallet.service';
+import { getUser, getUsersCount, persistUser } from '../utils/db.js';
+import { generateWallet } from './wallet.service.js';
 
 export const getFromSession = (c: Context, key: string): string => {
   // @ts-ignore
