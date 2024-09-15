@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { getGame, getGamesByPlayer, getPendingGameResults } from '../utils/db.js';
 import env from '../env.js';
-import { createGame, settlePendingGames } from 'src/services/game.service.js';
-import { getFromSession } from 'src/services/auth.service.js';
+import { createGame, settlePendingGames } from '../services/game.service.js';
+import { getFromSession } from '../services/auth.service.js';
 import { validator } from 'hono/validator';
 import { newGameSchema } from './schemas.js';
 

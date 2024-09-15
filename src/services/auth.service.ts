@@ -1,6 +1,6 @@
 import { XUser } from '@hono/oauth-providers/x';
 import { Context } from 'hono';
-import { getUser, getUsersCount, persistUser } from 'src/utils/db';
+import { getUser, getUsersCount, persistUser } from '../utils/db';
 import { generateWallet } from './wallet.service';
 
 export const getFromSession = (c: Context, key: string): string => {

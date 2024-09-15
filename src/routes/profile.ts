@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { getFromSession, setToSession } from '../services/auth.service.js';
 import { getUser } from '../utils/db.js';
-import { getPrivateKey } from 'src/services/wallet.service.js';
+import { getPrivateKey } from '../services/wallet.service.js';
 
 const router = new Hono();
 
