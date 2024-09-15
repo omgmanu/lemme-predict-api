@@ -3,6 +3,7 @@ import { ZodError, z } from 'zod';
 
 const EnvSchema = z.object({
   NODE_ENV: z.string().default('development'),
+  PORT: z.string().transform((v) => parseInt(v)),
   REDIS_CONNECTION_STRING: z.string(),
   SOLANA_RPC_HTTPS: z.string(),
   SOLANA_RPC_WSS: z.string(),

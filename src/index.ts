@@ -36,7 +36,7 @@ app.route('/api/v1', gameRouter);
 app.route('/api/v1', authRouter);
 app.route('/api/v1', profileRouter);
 
-const port = 3000;
+const port = env.PORT;
 console.log(`Server is running on port ${port}`);
 
 // init
